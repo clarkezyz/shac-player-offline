@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:linux
+
+      - name: Build for Windows
+        if: matrix.os == 'windows-latest'
+        run: npm run build:win
+
+      - name: Build for macOS
+        if: matrix.os == 'macos-latest'
+        run: npm run build:mac
+
+      - name: Upload Linux AppImage
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/SHAC Player-${{ github.event.release.tag_name }}.AppImage
+          asset_name: SHAC-Player-${{ github.event.release.tag_name }}.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux .deb
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/shac-player_${{ github.event.release.tag_name }}_amd64.deb
+          asset_name: shac-player_${{ github.event.release.tag_name }}_amd64.deb
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Installer
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/SHAC Player Setup ${{ github.event.release.tag_name }}.exe
+          asset_name: SHAC-Player-Setup-${{ github.event.release.tag_name }}.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Portable
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/SHAC Player ${{ github.event.release.tag_name }}.exe
+          asset_name: SHAC-Player-Portable-${{ github.event.release.tag_name }}.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS DMG
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/SHAC Player-${{ github.event.release.tag_name }}.dmg
+          asset_name: SHAC-Player-${{ github.event.release.tag_name }}.dmg
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS ZIP
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/SHAC Player-${{ github.event.release.tag_name }}-mac.zip
+          asset_name: SHAC-Player-${{ github.event.release.tag_name }}-mac.zip
+          asset_content_type: application/zip
