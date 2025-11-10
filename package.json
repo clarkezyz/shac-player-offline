@@ -28,6 +28,7 @@
   "build": {
     "appId": "com.shac.player",
     "productName": "SHAC Player",
+    "publish": null,
     "files": [
       "index.html",
       "styles.css",
